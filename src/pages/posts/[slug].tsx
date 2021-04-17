@@ -8,10 +8,22 @@ import Layout from "../../components/layout";
 import PostTitle from "../../components/post-title";
 import Head from "next/head";
 import { CMS_NAME } from "../../lib/constants";
-import markdownToHtml from "../../lib/markdownToHtml";
+import { useForm, usePlugin } from "tinacms";
 import { fetchGraphql } from "react-tinacms-strapi";
+import { InlineForm } from "react-tinacms-inline";
 
-export default function Post({ post, morePosts, preview }) {
+export default function Post({ post: initialPost, preview }) {
+  const formConfig = {
+    id: initialPost.id,
+    label: "Blog Post",
+    initialValues: initialPost,
+    onSubmit: () => {
+      alert("Saving!");
+    },
+    fields: [],
+  };
+  const [post, form] = useForm(formConfig);
+  usePlugin(form);
   const router = useRouter();
   if (!router.isFallback && !post?.slug) {
     return <ErrorPage statusCode={404} />;
@@ -34,13 +46,17 @@ export default function Post({ post, morePosts, preview }) {
                   content={process.env.STRAPI_URL + post.coverImage.url}
                 />
               </Head>
-              <PostHeader
-                title={post.title}
-                coverImage={process.env.STRAPI_URL + post.coverImage.url}
-                date={post.date}
-                author={post.author}
-              />
-              <PostBody content={post.content} />
+              {/* @ts-ignore */}
+              <InlineForm form={form} initialStatus={"active"}>
+                <PostHeader
+                  title={post.title}
+                  coverImage={process.env.STRAPI_URL + post.coverImage.url}
+                  date={post.date}
+                  author={post.author}
+                  preview={preview}
+                />
+                <PostBody content={post.content} />
+              </InlineForm>
             </article>
           </>
         )}
@@ -74,14 +90,12 @@ export async function getStaticProps({ params, preview, previewData }) {
   `,
   );
   const post = postResults.data.blogPosts[0];
-  const content = await markdownToHtml(post.content || "");
 
   if (preview) {
     return {
       props: {
         post: {
           ...post,
-          content,
         },
         preview,
         ...previewData,
@@ -93,7 +107,6 @@ export async function getStaticProps({ params, preview, previewData }) {
     props: {
       post: {
         ...post,
-        content,
       },
       preview: false,
     },
