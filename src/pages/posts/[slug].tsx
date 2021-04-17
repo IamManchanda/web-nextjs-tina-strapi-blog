@@ -8,17 +8,46 @@ import Layout from "../../components/layout";
 import PostTitle from "../../components/post-title";
 import Head from "next/head";
 import { CMS_NAME } from "../../lib/constants";
-import { useForm, usePlugin } from "tinacms";
 import { fetchGraphql } from "react-tinacms-strapi";
 import { InlineForm } from "react-tinacms-inline";
+import { useCMS, useForm, usePlugin } from "tinacms";
 
 export default function Post({ post: initialPost, preview }) {
+  const cms = useCMS();
   const formConfig = {
     id: initialPost.id,
     label: "Blog Post",
     initialValues: initialPost,
-    onSubmit: () => {
-      alert("Saving!");
+    onSubmit: async (values) => {
+      const saveMutation = `
+      mutation UpdateBlogPost(
+        $id: ID!
+        $title: String
+        $content: String
+        $coverImageId: ID
+      ) {
+        updateBlogPost(
+          input: {
+            where: { id: $id }
+            data: { title: $title, content: $content, coverImage: $coverImageId}
+          }
+        ) {
+          blogPost {
+            id
+          }
+        }
+      }`;
+      const response = await cms.api.strapi.fetchGraphql(saveMutation, {
+        id: values.id,
+        title: values.title,
+        content: values.content,
+        coverImageId: values.coverImage.id,
+      });
+      if (response.data) {
+        cms.alerts.success("Changes Saved");
+      } else {
+        cms.alerts.error("Error saving changes");
+      }
     },
     fields: [],
   };
