@@ -35,7 +35,10 @@ export default function HeroPost({
         </div>
         <div>
           <p className="mb-4 text-lg leading-relaxed">{excerpt}</p>
-          <Avatar name={author.name} picture={author.picture} />
+          <Avatar
+            name={author.name}
+            picture={process.env.STRAPI_URL + author.picture.url}
+          />
         </div>
       </div>
     </section>
