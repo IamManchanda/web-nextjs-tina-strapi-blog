@@ -7,7 +7,7 @@ export default function Intro() {
         Blog.
       </h1>
       <h4 className="mt-5 text-lg text-center md:text-left md:pl-8">
-        A statically generated blog example using{" "}
+        Blog App with Preview Mode using{" "}
         <a
           href="https://nextjs.org/"
           className="underline transition-colors duration-200 hover:text-success"
