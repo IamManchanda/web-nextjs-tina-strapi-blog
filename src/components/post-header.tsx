@@ -8,7 +8,10 @@ export default function PostHeader({ title, coverImage, date, author }) {
     <>
       <PostTitle>{title}</PostTitle>
       <div className="hidden md:block md:mb-12">
-        <Avatar name={author.name} picture={author.picture} />
+        <Avatar
+          name={author.name}
+          picture={process.env.STRAPI_URL + author.picture.url}
+        />
       </div>
       <div className="mb-8 md:mb-16 sm:mx-0">
         {/* @ts-ignore */}
@@ -16,7 +19,10 @@ export default function PostHeader({ title, coverImage, date, author }) {
       </div>
       <div className="max-w-2xl mx-auto">
         <div className="block mb-6 md:hidden">
-          <Avatar name={author.name} picture={author.picture} />
+          <Avatar
+            name={author.name}
+            picture={process.env.STRAPI_URL + author.picture.url}
+          />
         </div>
         <div className="mb-6 text-lg">
           <DateFormatter dateString={date} />

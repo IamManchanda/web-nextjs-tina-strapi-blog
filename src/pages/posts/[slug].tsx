@@ -5,11 +5,11 @@ import PostBody from "../../components/post-body";
 import Header from "../../components/header";
 import PostHeader from "../../components/post-header";
 import Layout from "../../components/layout";
-import { getPostBySlug, getAllPosts } from "../../lib/api";
 import PostTitle from "../../components/post-title";
 import Head from "next/head";
 import { CMS_NAME } from "../../lib/constants";
 import markdownToHtml from "../../lib/markdownToHtml";
+import { fetchGraphql } from "react-tinacms-strapi";
 
 export default function Post({ post, morePosts, preview }) {
   const router = useRouter();
@@ -29,11 +29,14 @@ export default function Post({ post, morePosts, preview }) {
                 <title>
                   {post.title} | Next.js Blog Example with {CMS_NAME}
                 </title>
-                <meta property="og:image" content={post.ogImage.url} />
+                <meta
+                  property="og:image"
+                  content={process.env.STRAPI_URL + post.coverImage.url}
+                />
               </Head>
               <PostHeader
                 title={post.title}
-                coverImage={post.coverImage}
+                coverImage={process.env.STRAPI_URL + post.coverImage.url}
                 date={post.date}
                 author={post.author}
               />
@@ -47,16 +50,30 @@ export default function Post({ post, morePosts, preview }) {
 }
 
 export async function getStaticProps({ params }) {
-  const post = getPostBySlug(params.slug, [
-    "title",
-    "date",
-    "slug",
-    "author",
-    "content",
-    "ogImage",
-    "coverImage",
-  ]);
-  // @ts-ignore
+  const postResults = await fetchGraphql(
+    process.env.STRAPI_URL,
+    `
+    query{
+      blogPosts(where: {slug: "${params.slug}"}){
+        id
+        title
+        date
+        slug
+        content
+        author {
+          name
+          picture { 
+            url
+          }
+        }
+        coverImage {
+          url
+        }
+      }
+    }
+  `,
+  );
+  const post = postResults.data.blogPosts[0];
   const content = await markdownToHtml(post.content || "");
 
   return {
@@ -70,13 +87,21 @@ export async function getStaticProps({ params }) {
 }
 
 export async function getStaticPaths() {
-  const posts = getAllPosts(["slug"]);
+  const postResults = await fetchGraphql(
+    process.env.STRAPI_URL,
+    `
+    query{
+      blogPosts{
+        slug
+      }
+    }
+  `,
+  );
 
   return {
-    paths: posts.map((post) => {
+    paths: postResults.data.blogPosts.map((post) => {
       return {
         params: {
-          // @ts-ignore
           slug: post.slug,
         },
       };
