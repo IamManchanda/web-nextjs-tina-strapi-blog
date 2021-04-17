@@ -75,5 +75,6 @@ export async function getStaticProps({ params, preview, previewData }) {
       allPosts: postResults.data.blogPosts,
       preview: false,
     },
+    revalidate: 1,
   };
 }

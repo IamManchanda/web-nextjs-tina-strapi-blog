@@ -139,6 +139,7 @@ export async function getStaticProps({ params, preview, previewData }) {
       },
       preview: false,
     },
+    revalidate: 1,
   };
 }
 
@@ -162,6 +163,6 @@ export async function getStaticPaths() {
         },
       };
     }),
-    fallback: false,
+    fallback: true,
   };
 }
