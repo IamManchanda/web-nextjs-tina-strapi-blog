@@ -12,6 +12,7 @@
     "**/npm-debug.log*": true,
     "**/yarn-debug.log*": true,
     "**/yarn-error.log*": true,
+    "**/.env": false,
     "**/.env.local": false,
     "**/.env.development.local": false,
     "**/.env.test.local": false,
